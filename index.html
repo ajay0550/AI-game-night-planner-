@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Game Night Planner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            width: 50%;
+        }
+        input, button {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        pre {
+            background-color: #fff;
+            padding: 15px;
+            text-align: left;
+            display: inline-block;
+            width: 80%;
+            white-space: pre-wrap;
+            border-radius: 5px;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🎲 Family Game Night Planner 🎮</h1>
+        <label>Number of Players:</label>
+        <input type="number" id="players" min="2" max="10" placeholder="Enter number of players">
+        <br><br>
+        <label>Available Hours:</label>
+        <input type="number" id="hours" min="1" max="5" placeholder="Enter available hours">
+        <br><br>
+        <button onclick="getGameRecommendations()">Find Games</button>
+        <h2>Recommended Games:</h2>
+        <pre id="results">Your game recommendations will appear here...</pre>
+    </div>
+
+    <script>
+        async function getGameRecommendations() {
+            const players = document.getElementById("players").value;
+            const hours = document.getElementById("hours").value;
+    
+            document.getElementById("results").innerText = "Finding the best games for your family night...";
+    
+            try {
+                const response = await fetch("http://127.0.0.1:5000/get-game-recommendations", {  
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ players, hours })
+                });
+    
+                if (!response.ok) {
+                    throw new Error("Failed to fetch recommendations");
+                }
+    
+                const data = await response.json();
+    
+                if (!data.games || !Array.isArray(data.games)) {
+                    throw new Error("Invalid response format");
+                }
+    
+                let resultText = "";
+                data.games.forEach(game => {
+                    resultText += `🎲 **${game.name}**\n`;
+                    resultText += `⌛ Duration: ${game.duration} hours\n`;
+                    resultText += `👥 Players: ${game.players}+\n`;
+                    resultText += `📜 Description: ${game.description}\n\n`;
+                });
+    
+                document.getElementById("results").innerText = resultText;
+            } catch (error) {
+                document.getElementById("results").innerText = "Error: " + error.message;
+            }
+        }
+    </script>
+
+</body>
+</html>
